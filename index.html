@@ -1,633 +1,432 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Horas a Favor — Familia Villares</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0;}
-  :root{
-    --bg:#f9f9f9;--bg2:#ffffff;--bg3:#f0f0f0;
-    --border:#e0e0e0;--border2:#d0d0d0;
-    --text:#1a1a1a;--text2:#555;--text3:#999;
-    --green:#1a7a4a;--green-bg:#e8f5ee;
-    --red:#c0392b;--red-bg:#fdecea;
-    --blue:#1a5fa8;--blue-bg:#e8f0fa;
-    --radius:12px;--radius-sm:8px;
-  }
-  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;}
-  .app{width:100%;max-width:420px;min-height:100vh;background:var(--bg2);display:flex;flex-direction:column;position:relative;box-shadow:0 0 40px rgba(0,0,0,0.08);}
-  .screen{display:none;flex-direction:column;flex:1;}
-  .screen.active{display:flex;}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Horas a Favor NG</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --text: #1d2939;
+      --muted: #667085;
+      --border: #d0d5dd;
+      --primary: #c50039;
+      --primary-dark: #9f002e;
+      --focus: rgba(197, 0, 57, .18);
+      --danger: #b42318;
+      --ok: #067647;
+      --warning: #b54708;
+      --shadow: 0 18px 45px rgba(16, 24, 40, .08);
+    }
 
-  /* TOPBAR */
-  .topbar{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
-  .topbar-title{font-size:16px;font-weight:600;color:var(--text);flex:1;}
-  .back-btn{background:none;border:none;cursor:pointer;color:var(--text2);font-size:22px;padding:0;display:flex;align-items:center;line-height:1;}
-  .back-btn:hover{color:var(--text);}
+    * {
+      box-sizing: border-box;
+    }
 
-  /* BODY */
-  .body{flex:1;padding:20px 16px;overflow-y:auto;padding-bottom:80px;}
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
 
-  /* LOGIN */
-  .login-hero{text-align:center;padding:36px 0 28px;}
-  .login-icon{width:70px;height:70px;border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:30px;}
-  .login-hero h1{font-size:22px;font-weight:600;color:var(--text);margin-bottom:5px;}
-  .login-hero p{font-size:14px;color:var(--text2);}
-  .search-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
-  .search-card label{font-size:13px;color:var(--text2);display:block;margin-bottom:8px;font-weight:500;}
+    .page-logo {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      width: min(40vw, 390px);
+      max-height: 48vh;
+      object-fit: contain;
+      object-position: right bottom;
+      opacity: .13;
+      pointer-events: none;
+      z-index: 0;
+    }
 
-  /* INPUTS */
-  input,select{width:100%;padding:11px 14px;font-size:15px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg2);color:var(--text);font-family:'Inter',sans-serif;transition:border .2s;}
-  input:focus,select:focus{outline:none;border-color:var(--blue);}
-  input[type=number]{letter-spacing:1px;}
+    main {
+      position: relative;
+      z-index: 1;
+      width: min(820px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0;
+    }
 
-  /* BUTTONS */
-  .btn{width:100%;padding:12px;font-size:14px;font-weight:600;border:none;border-radius:var(--radius-sm);background:var(--text);color:#fff;cursor:pointer;margin-top:12px;transition:opacity .2s;font-family:'Inter',sans-serif;}
-  .btn:hover{opacity:.85;}
-  .btn:disabled{opacity:.4;cursor:not-allowed;}
-  .btn-outline{background:var(--bg2);color:var(--text);border:1px solid var(--border2);}
-  .btn-outline:hover{background:var(--bg3);}
-  .btn-sm{padding:7px 14px;font-size:13px;font-weight:500;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg2);color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;width:auto;margin-top:0;}
-  .btn-sm:hover{background:var(--bg3);}
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
 
-  /* MESSAGES */
-  .err{font-size:13px;color:var(--red);margin-top:8px;display:none;padding:8px 12px;background:var(--red-bg);border-radius:var(--radius-sm);}
-  .inf{font-size:13px;color:var(--blue);margin-top:8px;display:none;padding:8px 12px;background:var(--blue-bg);border-radius:var(--radius-sm);}
-  .suc{font-size:13px;color:var(--green);margin-top:8px;display:none;padding:8px 12px;background:var(--green-bg);border-radius:var(--radius-sm);}
+    .brand {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
 
-  /* PERFIL */
-  .emp-header{background:var(--bg3);border-radius:var(--radius);padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
-  .emp-avatar{width:48px;height:48px;border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:var(--blue);flex-shrink:0;}
-  .emp-name{font-size:16px;font-weight:600;color:var(--text);}
-  .emp-sub{font-size:13px;color:var(--text2);margin-top:3px;}
-  .emp-dni{font-size:12px;color:var(--text3);margin-top:2px;}
+    h1 {
+      margin: 5px 0 0;
+      font-size: clamp(25px, 5vw, 36px);
+      line-height: 1.08;
+    }
 
-  .saldo-card{border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;border:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;}
-  .saldo-label{font-size:13px;color:var(--text2);font-weight:500;}
-  .saldo-sub{font-size:11px;color:var(--text3);margin-top:3px;}
-  .saldo-val{font-size:28px;font-weight:600;}
-  .saldo-val.pos{color:var(--green);}
-  .saldo-val.neg{color:var(--red);}
-  .saldo-val.neu{color:var(--text);}
+    .date-pill {
+      white-space: nowrap;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      color: var(--muted);
+      background: #fff;
+      font-size: 14px;
+      font-weight: 700;
+    }
 
-  .sec-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
+    form {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
 
-  /* HISTORIAL */
-  .hist-empty{text-align:center;padding:24px;font-size:13px;color:var(--text3);background:var(--bg3);border-radius:var(--radius-sm);}
-  .hist-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;}
-  .hist-fecha{font-size:12px;color:var(--text3);}
-  .hist-tipo{font-size:13px;font-weight:500;color:var(--text);margin-top:2px;}
-  .hist-obs{font-size:11px;color:var(--text3);margin-top:2px;}
-  .hist-local{font-size:11px;color:var(--text2);margin-top:1px;}
-  .hist-hs{font-size:17px;font-weight:600;white-space:nowrap;}
-  .hist-hs.pos{color:var(--green);}
-  .hist-hs.neg{color:var(--red);}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
 
-  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;}
-  .badge-s{background:var(--green-bg);color:var(--green);}
-  .badge-d{background:var(--red-bg);color:var(--red);}
+    .field {
+      display: grid;
+      gap: 7px;
+    }
 
-  /* FAB */
-  .fab{position:fixed;bottom:72px;right:calc(50% - 210px + 14px);width:52px;height:52px;border-radius:50%;background:var(--text);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:26px;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);}
-  .fab:hover{opacity:.85;}
-  @media(max-width:420px){.fab{right:14px;}}
+    .field.full {
+      grid-column: 1 / -1;
+    }
 
-  /* BOTTOM BAR */
-  .bottombar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:var(--bg2);border-top:1px solid var(--border);display:flex;justify-content:center;padding:10px;}
-  .home-tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;background:none;border:none;padding:4px 24px;font-family:'Inter',sans-serif;}
-  .home-tab:hover{color:var(--text);}
+    label {
+      font-size: 14px;
+      font-weight: 700;
+    }
 
-  /* FORM */
-  .form-field{margin-bottom:14px;}
-  .form-field label{font-size:13px;color:var(--text2);display:block;margin-bottom:5px;font-weight:500;}
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+    }
 
-  /* OK SCREEN */
-  .ok-icon{width:68px;height:68px;border-radius:50%;background:var(--green-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;}
+    input[readonly] {
+      background: #f8fafc;
+      color: #475467;
+    }
 
-  /* ADMIN */
-  .admin-link{text-align:center;margin-top:16px;}
-  .admin-link button{background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;font-family:'Inter',sans-serif;}
-  .admin-pass{margin-top:10px;display:none;}
-  .info-box{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--text2);line-height:1.7;}
-  .info-box b{color:var(--text);}
-  .emp-row{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;}
-  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--bg3);color:var(--text2);margin-right:4px;}
-  .divider{height:1px;background:var(--border);margin:20px 0;}
-</style>
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 3px solid var(--focus);
+      border-color: var(--primary);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      min-height: 44px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 22px;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .6;
+    }
+
+    .status {
+      min-height: 22px;
+      margin-top: 14px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .status.warning {
+      color: var(--warning);
+    }
+
+    iframe {
+      display: none;
+    }
+
+    @media (max-width: 680px) {
+      main {
+        padding: 18px 0;
+      }
+
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      form {
+        padding: 16px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      .page-logo {
+        width: 56vw;
+        max-height: 34vh;
+        opacity: .1;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="app">
+  <img class="page-logo" src="isotipo.png" alt="">
 
-<!-- LOGIN -->
-<div id="s-login" class="screen active">
-  <div class="body" style="padding-bottom:20px;">
-    <div class="login-hero">
-      <div class="login-icon">🕐</div>
-      <h1>Horas a favor</h1>
-      <p>Familia Villares</p>
-    </div>
-    <div class="search-card">
-      <label>Ingresá tu DNI para continuar</label>
-      <input type="number" id="inp-dni" placeholder="Ej: 42882845" inputmode="numeric" onkeydown="if(event.key==='Enter')buscarDNI()">
-      <div class="err" id="err-dni">❌ DNI no encontrado en el sistema</div>
-      <div class="inf" id="inf-dni">Buscando...</div>
-      <button class="btn" id="btn-buscar" onclick="buscarDNI()">Ingresar →</button>
-    </div>
-    <div class="admin-link">
-      <button onclick="toggleAdmin()">Acceso administrador</button>
-      <div class="admin-pass" id="admin-pass">
-        <input type="password" id="inp-pass" placeholder="Contraseña" style="margin-top:8px;" onkeydown="if(event.key==='Enter')loginAdmin()">
-        <button class="btn" onclick="loginAdmin()" style="margin-top:8px;">Entrar como admin</button>
-        <div class="err" id="err-pass">Contraseña incorrecta</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- PERFIL -->
-<div id="s-perfil" class="screen">
-  <div class="topbar">
-    <div class="topbar-title" id="tp-nombre">—</div>
-    <button class="back-btn" onclick="irHome()" title="Salir">✕</button>
-  </div>
-  <div class="body">
-    <div class="emp-header">
-      <div class="emp-avatar" id="pf-iniciales">—</div>
+  <main>
+    <header>
       <div>
-        <div class="emp-name" id="pf-nombre">—</div>
-        <div class="emp-sub" id="pf-local">—</div>
-        <div class="emp-dni" id="pf-dni">—</div>
+        <div class="brand">Familia Villares</div>
+        <h1>Horas a Favor NG</h1>
       </div>
-    </div>
-    <div class="saldo-card">
-      <div>
-        <div class="saldo-label">Saldo actual de horas</div>
-        <div class="saldo-sub" id="pf-detalle">—</div>
+      <div class="date-pill" id="todayLabel"></div>
+    </header>
+
+    <form id="hoursForm" method="post" target="submitFrame">
+      <div class="grid">
+        <div class="field">
+          <label for="fecha">Fecha</label>
+          <input id="fecha" name="fecha" type="date" required>
+        </div>
+
+        <div class="field">
+          <label for="tipo">Tipo</label>
+          <select id="tipo" name="tipo" required>
+            <option value="">Seleccionar</option>
+            <option value="Horas a favor">Horas a favor</option>
+            <option value="Horas a descontar">Horas a descontar</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="dni">DNI</label>
+          <input id="dni" name="dni" inputmode="numeric" autocomplete="off" required>
+          <div class="hint" id="employeeHint">Ingresar DNI sin puntos.</div>
+        </div>
+
+        <div class="field">
+          <label for="nombre">Apellido y nombre</label>
+          <input id="nombre" name="nombre" readonly required>
+        </div>
+
+        <div class="field">
+          <label for="local">Local</label>
+          <select id="local" name="local" required></select>
+          <div class="hint">Se completa por nomina, pero se puede cambiar.</div>
+        </div>
+
+        <div class="field">
+          <label for="cantidad">Cantidad de horas</label>
+          <input id="cantidad" name="cantidad" type="number" min="0.25" step="0.25" required>
+          <div class="hint">Usar decimales: 1.5 equivale a una hora y media.</div>
+        </div>
+
+        <div class="field full">
+          <label for="motivo">Motivo</label>
+          <textarea id="motivo" name="motivo" required></textarea>
+        </div>
       </div>
-      <div class="saldo-val neu" id="pf-saldo">— hs</div>
-    </div>
-    <div class="sec-title">Historial de movimientos</div>
-    <div id="hist-list"><div class="hist-empty">Cargando...</div></div>
-  </div>
-  <button class="fab" onclick="irCargar()" title="Cargar horas">+</button>
-  <div class="bottombar">
-    <button class="home-tab" onclick="irHome()">🏠<span>Home</span></button>
-  </div>
-</div>
 
-<!-- CARGAR -->
-<div id="s-cargar" class="screen">
-  <div class="topbar">
-    <button class="back-btn" onclick="irPerfil()" title="Volver">←</button>
-    <div class="topbar-title">Cargar horas</div>
-  </div>
-  <div class="body">
-    <div class="form-field">
-      <label>Local</label>
-      <select id="f-local">
-        <option value="">Seleccioná tu local...</option>
-        <option>ANCHORENA</option><option>AYACUCHO</option><option>CHARCAS</option>
-        <option>EQUIPO LOCALES</option><option>FRANQUICIAS</option><option>JURAMENTO</option>
-        <option>LA LUCILA</option><option>LAS HERAS</option><option>MANTENIMIENTO</option>
-        <option>MARTINEZ</option><option>NUTRICION</option><option>OFFICE PARK</option>
-        <option>P. CHAMPAGNAT</option><option>P. PILAR</option><option>PAMPA</option>
-        <option>ROCA</option><option>RODRIGUEZ PEÑA</option><option>SALGUERO</option>
-        <option>SAN ISIDRO</option><option>SCALABRINI ORTIZ</option><option>TALCAHUANO</option>
-        <option>TORTUGAS</option><option>UGARTE</option><option>ZABALA</option>
-      </select>
-    </div>
-    <div class="form-field">
-      <label>Tipo de movimiento</label>
-      <select id="f-tipo">
-        <option value="">Seleccioná...</option>
-        <option value="favor">✅ Sumar horas a favor</option>
-        <option value="descontar">🔻 Descontar horas a favor</option>
-      </select>
-    </div>
-    <div class="form-field">
-      <label>Fecha</label>
-      <input type="date" id="f-fecha">
-    </div>
-    <div class="form-field">
-      <label>Cantidad de horas</label>
-      <input type="number" id="f-horas" placeholder="Ej: 2 o 1.5" min="0.5" step="0.5" inputmode="decimal">
-    </div>
-    <div class="form-field">
-      <label>Observación (opcional)</label>
-      <input type="text" id="f-obs" placeholder="Ej: feriado 25 de mayo">
-    </div>
-    <div class="err" id="err-form">Completá todos los campos obligatorios</div>
-    <div class="inf" id="inf-form">⏳ Guardando...</div>
-    <button class="btn" id="btn-guardar" onclick="guardarCarga()">Guardar carga</button>
-    <button class="btn btn-outline" onclick="irPerfil()" style="margin-top:8px;">Cancelar</button>
-  </div>
-</div>
+      <input id="registradoDesde" name="registradoDesde" type="hidden" value="GitHub Pages">
 
-<!-- OK -->
-<div id="s-ok" class="screen">
-  <div class="body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:80vh;gap:12px;padding-bottom:20px;">
-    <div class="ok-icon">✅</div>
-    <div>
-      <div style="font-size:18px;font-weight:600;margin-bottom:6px;">¡Carga guardada!</div>
-      <div style="font-size:14px;color:var(--text2);" id="ok-resumen">—</div>
-    </div>
-    <button class="btn" style="max-width:220px;margin-top:8px;" onclick="irPerfil()">Ver mis horas</button>
-    <button class="home-tab" onclick="irHome()" style="margin-top:4px;">🏠 Home</button>
-  </div>
-</div>
-
-<!-- ADMIN -->
-<div id="s-admin" class="screen">
-  <div class="topbar">
-    <button class="back-btn" onclick="irHome()" title="Volver">←</button>
-    <div class="topbar-title">Panel administrador</div>
-  </div>
-  <div class="body">
-
-    <div class="sec-title">Agregar empleado nuevo</div>
-    <div style="border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:8px;">
-      <div class="form-field"><label>DNI (sin puntos)</label><input type="number" id="a-dni" placeholder="Ej: 45123456"></div>
-      <div class="form-field"><label>Apellido</label><input type="text" id="a-apellido" placeholder="Apellido"></div>
-      <div class="form-field"><label>Nombre</label><input type="text" id="a-nombre" placeholder="Nombre"></div>
-      <div class="form-field" style="margin-bottom:0;"><label>Local</label>
-        <select id="a-local">
-          <option value="">Seleccioná...</option>
-          <option>ANCHORENA</option><option>AYACUCHO</option><option>CHARCAS</option>
-          <option>EQUIPO LOCALES</option><option>FRANQUICIAS</option><option>JURAMENTO</option>
-          <option>LA LUCILA</option><option>LAS HERAS</option><option>MANTENIMIENTO</option>
-          <option>MARTINEZ</option><option>NUTRICION</option><option>OFFICE PARK</option>
-          <option>P. CHAMPAGNAT</option><option>P. PILAR</option><option>PAMPA</option>
-          <option>ROCA</option><option>RODRIGUEZ PEÑA</option><option>SALGUERO</option>
-          <option>SAN ISIDRO</option><option>SCALABRINI ORTIZ</option><option>TALCAHUANO</option>
-          <option>TORTUGAS</option><option>UGARTE</option><option>ZABALA</option>
-        </select>
+      <div class="actions">
+        <button id="submitButton" type="submit" disabled>Enviar</button>
       </div>
-      <div class="err" id="err-admin">Completá todos los campos</div>
-      <div class="inf" id="inf-admin">Guardando...</div>
-      <div class="suc" id="suc-admin">✅ Empleado agregado correctamente</div>
-      <button class="btn" onclick="agregarEmpleado()" style="margin-top:12px;">+ Agregar empleado</button>
-    </div>
 
-    <div class="divider"></div>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+    </form>
 
-    <div class="sec-title">Buscar empleado</div>
-    <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <input type="number" id="b-dni" placeholder="Buscá por DNI" style="flex:1;">
-      <button class="btn-sm" onclick="buscarAdmin()">Buscar</button>
-    </div>
-    <div id="admin-resultado"></div>
+    <iframe name="submitFrame" id="submitFrame" title="Envio de formulario"></iframe>
+  </main>
 
-    <div class="divider"></div>
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyCnHBe3NhPE5IABgTz89JDsk81LhZCkSLAJe3JwGSG09eGW-K6aUIl1WAiEPW06-KriA/exec';
 
-    <div class="sec-title">Cómo actualizar la nómina</div>
-    <div class="info-box">
-      <b>Desde esta app:</b> Usá el formulario de arriba — los cambios se guardan en el momento.<br><br>
-      <b>Desde Google Sheets:</b> Abrí la solapa <b>NOMINA</b> y editá directamente. Los cambios se ven en la próxima vez que alguien inicie sesión en la app.
-    </div>
-  </div>
-</div>
+    const NOMINA = [
+      { dni: '11111111', nombre: 'PEREZ JUAN', local: 'CASA CENTRAL' },
+      { dni: '22222222', nombre: 'GOMEZ MARIA', local: 'SUCURSAL 1' }
+    ];
 
-</div><!-- end .app -->
+    const LOCALES_EXTRA = [
+      'CASA CENTRAL',
+      'SUCURSAL 1',
+      'SUCURSAL 2'
+    ];
 
-<script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzz3sdCZ0bSDpl4r2Ns7llKUuWyr9yR66Y9jW9lhb_eYslxvxvM5DuLgKYsUtNAl9lMTQ/exec';
-const ADMIN_PASS='villares2025';
+    const form = document.querySelector('#hoursForm');
+    const submitButton = document.querySelector('#submitButton');
+    const statusBox = document.querySelector('#status');
+    const frame = document.querySelector('#submitFrame');
+    const dniInput = document.querySelector('#dni');
+    const nombreInput = document.querySelector('#nombre');
+    const localSelect = document.querySelector('#local');
+    const employeeHint = document.querySelector('#employeeHint');
+    const today = new Date();
+    const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+    const employeesByDni = new Map(NOMINA.map(employee => [normalizeDni(employee.dni), employee]));
 
-const NOMINA={
-"25285466":{nombre:"FERNANDA",apellido:"PRIETO Z.",local:"LAS HERAS"},
-"32384984":{nombre:"SOLEDAD VANINA",apellido:"MINADEO",local:"OFFICE PARK"},
-"21341357":{nombre:"MARTHA",apellido:"ESCOBAR",local:"EQUIPO LOCALES"},
-"31297595":{nombre:"MARCELA",apellido:"CERDÁ",local:"EQUIPO LOCALES"},
-"33309509":{nombre:"ROXANA",apellido:"RODRIGUEZ",local:"ROCA"},
-"27332740":{nombre:"CLAUDIA",apellido:"MOLINA",local:"OFFICE PARK"},
-"16171351":{nombre:"SANDRA",apellido:"FIGUEROA SANCHEZ",local:"EQUIPO LOCALES"},
-"36947509":{nombre:"BELEN",apellido:"TORRES",local:"EQUIPO LOCALES"},
-"92292869":{nombre:"ESTELA",apellido:"SAMPAYO",local:"TALCAHUANO"},
-"31653741":{nombre:"LEILA",apellido:"SANGINETO",local:"P. PILAR"},
-"33531150":{nombre:"LUCIANA",apellido:"GOMEZ",local:"EQUIPO LOCALES"},
-"28528378":{nombre:"ANDREA",apellido:"SANTOME",local:"CHARCAS"},
-"32137927":{nombre:"SILVINA",apellido:"JARA",local:"SAN ISIDRO"},
-"25990069":{nombre:"MAISA",apellido:"ALARCÓN",local:"CHARCAS"},
-"31705457":{nombre:"NADIA",apellido:"GARCIA",local:"P. PILAR"},
-"30592384":{nombre:"ANDREA",apellido:"BOTTERO",local:"EQUIPO LOCALES"},
-"37346155":{nombre:"MARIA JOSE",apellido:"JACOB",local:"P. CHAMPAGNAT"},
-"25127680":{nombre:"STELLA MARIS",apellido:"OVIS",local:"MARTINEZ"},
-"29583150":{nombre:"CELESTE",apellido:"DAUNINE",local:"EQUIPO LOCALES"},
-"29502827":{nombre:"BETINA",apellido:"COLOMBARONI",local:"FRANQUICIAS"},
-"24415950":{nombre:"NATALIA",apellido:"SERAPIO",local:"AYACUCHO"},
-"23351701":{nombre:"CANDELA",apellido:"SICILIANO",local:"UGARTE"},
-"32615032":{nombre:"VICTORIA",apellido:"OCAMPO",local:"NUTRICION"},
-"36312442":{nombre:"MAR",apellido:"FRAMULARI",local:"LA LUCILA"},
-"36275813":{nombre:"STEFANIA",apellido:"SAVOIA",local:"NUTRICION"},
-"33909945":{nombre:"CARLA",apellido:"ZANATA",local:"UGARTE"},
-"38993988":{nombre:"MARIELA",apellido:"LOPEZ",local:"RODRIGUEZ PEÑA"},
-"25593778":{nombre:"MARIA ESTER",apellido:"GOMEZ",local:"TALCAHUANO"},
-"39460434":{nombre:"MARTIN",apellido:"ROSSI",local:"FRANQUICIAS"},
-"35905570":{nombre:"FERNANDA",apellido:"AGUILAR",local:"SCALABRINI ORTIZ"},
-"25521083":{nombre:"CRISTINA",apellido:"FERREYRA",local:"SAN ISIDRO"},
-"38989587":{nombre:"KARINA",apellido:"STRAUS",local:"NUTRICION"},
-"35726142":{nombre:"MARIELA",apellido:"RAMOS",local:"AYACUCHO"},
-"37766898":{nombre:"MARIANA",apellido:"SALAZAR",local:"LAS HERAS"},
-"38467767":{nombre:"BARBARA",apellido:"PICCARDI",local:"RODRIGUEZ PEÑA"},
-"38616830":{nombre:"CINTIA",apellido:"VALENTIN",local:"NUTRICION"},
-"35426777":{nombre:"MARIANA",apellido:"SPENGLER",local:"NUTRICION"},
-"38433728":{nombre:"CAMILA",apellido:"ROMEO",local:"NUTRICION"},
-"38124805":{nombre:"MICAELA",apellido:"ESPESO",local:"EQUIPO LOCALES"},
-"38518532":{nombre:"PAMELA",apellido:"VILLAGRA",local:"PAMPA"},
-"35561533":{nombre:"JESSICA",apellido:"DIAZ",local:"ROCA"},
-"36175464":{nombre:"CORINA",apellido:"RUSSO",local:"FRANQUICIAS"},
-"35217084":{nombre:"JESICA",apellido:"ARCE",local:"LAS HERAS"},
-"34619188":{nombre:"AYELEN",apellido:"SAYAGO",local:"LAS HERAS"},
-"39169137":{nombre:"CAMILA",apellido:"ENRIQUE",local:"NUTRICION"},
-"37481524":{nombre:"NICOLAS",apellido:"PEREZ ARENA",local:"FRANQUICIAS"},
-"35588740":{nombre:"LUJAN",apellido:"SOSA",local:"EQUIPO LOCALES"},
-"37280540":{nombre:"ROMINA",apellido:"NICOLAS",local:"TALCAHUANO"},
-"34974577":{nombre:"LAURA",apellido:"MARTINEZ",local:"ZABALA"},
-"38629011":{nombre:"BARBARA",apellido:"RIVERA",local:"FRANQUICIAS"},
-"35425065":{nombre:"CELESTE",apellido:"MALDONADO",local:"P. PILAR"},
-"42587580":{nombre:"RAMIRO",apellido:"IDOYAGA",local:"EQUIPO LOCALES"},
-"35607900":{nombre:"YANELA",apellido:"AGUIAR",local:"JURAMENTO"},
-"24873640":{nombre:"DIEGO",apellido:"MORANDO",local:"MANTENIMIENTO"},
-"42563478":{nombre:"IVAN",apellido:"LIBUTTI",local:"EQUIPO LOCALES"},
-"40491392":{nombre:"AYELEN",apellido:"ROLDAN",local:"P. CHAMPAGNAT"},
-"96033729":{nombre:"PAULA",apellido:"OCHOA",local:"EQUIPO LOCALES"},
-"41824603":{nombre:"CANDELARIA",apellido:"BARDI",local:"SAN ISIDRO"},
-"42567654":{nombre:"VICTORIA",apellido:"HERRERA",local:"ROCA"},
-"42246858":{nombre:"WALTER",apellido:"CARDOZO",local:"ANCHORENA"},
-"43192661":{nombre:"GABRIELA",apellido:"PEDROZO",local:"SALGUERO"},
-"95945004":{nombre:"MARIAM",apellido:"INOJOSA HERNANDEZ",local:"ZABALA"},
-"95895154":{nombre:"LUIS",apellido:"PRESILLA RUIZ",local:"EQUIPO LOCALES"},
-"40716024":{nombre:"MELANY",apellido:"FLORENA",local:"RODRIGUEZ PEÑA"},
-"40956731":{nombre:"NICOLAS",apellido:"LOBERTO",local:"ZABALA"},
-"39284062":{nombre:"MARÍA",apellido:"ARMOA",local:"TORTUGAS"},
-"43390500":{nombre:"ALEJANDRO EZEQUIEL",apellido:"ZALAZAR",local:"LA LUCILA"},
-"95906390":{nombre:"LISBETH",apellido:"ESCORCIO",local:"RODRIGUEZ PEÑA"},
-"35358279":{nombre:"JULIANA",apellido:"MORENO",local:"EQUIPO LOCALES"},
-"35998142":{nombre:"ELIANA",apellido:"VILLALBA",local:"ANCHORENA"},
-"95906563":{nombre:"MARIANGELA",apellido:"DELGADO",local:"JURAMENTO"},
-"44095283":{nombre:"IRENE",apellido:"SCHENBERGER",local:"PAMPA"},
-"40397060":{nombre:"MICHELLE",apellido:"PERSONA AYALA",local:"SCALABRINI ORTIZ"},
-"51398509":{nombre:"ALEXA",apellido:"FABBIAN EDWARDS",local:"EQUIPO LOCALES"},
-"41257459":{nombre:"AGUSTINA",apellido:"ZACARIAS",local:"UGARTE"},
-"95560551":{nombre:"MARIA FERNANDA",apellido:"HERRERA",local:"LAS HERAS"},
-"36824077":{nombre:"EVELYN VANESA",apellido:"CRUZ CIVIT",local:"EQUIPO LOCALES"},
-"28463432":{nombre:"MARIA FLORENCIA",apellido:"JOFRE",local:"TALCAHUANO"},
-"30387886":{nombre:"CAROLINA INES",apellido:"TORRES",local:"CHARCAS"},
-"44420991":{nombre:"CANDELA",apellido:"MATTERI",local:"ROCA"},
-"95974570":{nombre:"RAFAEL",apellido:"RANGEL",local:"JURAMENTO"},
-"43323347":{nombre:"SOFIA ANA",apellido:"ISLA",local:"ZABALA"},
-"43897214":{nombre:"ALAN",apellido:"QUIROZ",local:"EQUIPO LOCALES"},
-"36918225":{nombre:"DAMARIS",apellido:"GUZMAN",local:"CHARCAS"},
-"42627396":{nombre:"CAROLINA LAURA",apellido:"STIVANELLO",local:"MARTINEZ"},
-"41956147":{nombre:"SABRINA SOL",apellido:"LEGUIZAMON",local:"MARTINEZ"},
-"42882845":{nombre:"ERIKA CINTHIA",apellido:"OVANDO QUECAÑA",local:"ANCHORENA"},
-"34943234":{nombre:"NANCY FABIANA",apellido:"FORSTHOFF",local:"JURAMENTO"},
-"44725033":{nombre:"LUDMILA",apellido:"DO PRADO",local:"EQUIPO LOCALES"},
-"41704706":{nombre:"FERNANDA",apellido:"VERON",local:"ANCHORENA"},
-"42056224":{nombre:"JAEL",apellido:"JOFRE",local:"JURAMENTO"},
-"43083182":{nombre:"MILAGROS AYELEN",apellido:"LONGOBUCCO",local:"EQUIPO LOCALES"},
-"38636861":{nombre:"AILIN MELISA",apellido:"RULLI",local:"CHARCAS"},
-"43181363":{nombre:"FLORENCIA SOLEDAD",apellido:"HERRERA",local:"EQUIPO LOCALES"},
-"41540139":{nombre:"LUDMILA GENESIS",apellido:"GODOY",local:"SCALABRINI ORTIZ"},
-"38914955":{nombre:"ANDREA TAMARA",apellido:"VADILLO",local:"P. CHAMPAGNAT"},
-"44885324":{nombre:"AYELEN ANTONELLA",apellido:"RUIZ CAMPOS",local:"P. PILAR"},
-"45431408":{nombre:"MARTINA",apellido:"LEGUIZAMON",local:"TORTUGAS"},
-"42660230":{nombre:"PAULA BELÉN",apellido:"CARUSO",local:"PAMPA"},
-"42457382":{nombre:"BRAIAN NICOLAS",apellido:"RODRIGUEZ",local:"TORTUGAS"},
-"41330167":{nombre:"MARIA EUGENIA",apellido:"VILA ARANDA",local:"OFFICE PARK"},
-"46419024":{nombre:"MILTON URIEL",apellido:"NIEVA",local:"MANTENIMIENTO"},
-"45237927":{nombre:"MARIANELLA",apellido:"MOLINAS",local:"EQUIPO LOCALES"},
-"43722896":{nombre:"FIORELLA DANA",apellido:"DI STEFANO",local:"SALGUERO"},
-"36381961":{nombre:"EMILCE CLARIBEL",apellido:"ARREDONDO AMESTOY",local:"ZABALA"},
-"46583324":{nombre:"CANDELA MELINA",apellido:"VARGAS",local:"LAS HERAS"},
-"37201195":{nombre:"LUCILA SILVANA",apellido:"AYALA",local:"LA LUCILA"},
-"43241805":{nombre:"TRINIDAD JULIETA",apellido:"DELLACASA",local:"SCALABRINI ORTIZ"},
-"96194455":{nombre:"VALERIA SOFIA",apellido:"MORENO ARISMENDI",local:"UGARTE"},
-"44398034":{nombre:"JESSICA",apellido:"MARTINEZ",local:"ROCA"},
-"40578219":{nombre:"GASTÓN EDUARDO",apellido:"FERRETTI",local:"EQUIPO LOCALES"},
-"46363520":{nombre:"ARIADNA FIORELLA",apellido:"FERNÁNDEZ",local:"RODRIGUEZ PEÑA"},
-"45326302":{nombre:"LUANA MELINA",apellido:"SEGUI",local:"RODRIGUEZ PEÑA"},
-"44129252":{nombre:"DENISE CHIARA",apellido:"NARCISO",local:"AYACUCHO"},
-"42836201":{nombre:"CAMILA BELÉN",apellido:"RIOS SCHWAB",local:"JURAMENTO"},
-"43903023":{nombre:"FACUNDO URIEL",apellido:"FLORES",local:"TORTUGAS"},
-"42647906":{nombre:"ANDREA",apellido:"CHAVEZ OJEDA",local:"CHARCAS"},
-"45815298":{nombre:"ABRIL",apellido:"DEL OLMO",local:"P. PILAR"},
-"45580801":{nombre:"RITA VICTORIA",apellido:"DE BARROS DURAN",local:"SALGUERO"},
-"42111255":{nombre:"LUCAS IGNACIO",apellido:"MICHELI",local:"MARTINEZ"},
-"44840757":{nombre:"MICAELA",apellido:"BLANCO",local:"P. CHAMPAGNAT"},
-"39813463":{nombre:"LUCAS GABRIEL",apellido:"SECRETO",local:"RODRIGUEZ PEÑA"},
-"41852791":{nombre:"CECILIA AYELÉN",apellido:"VALENTE",local:"TALCAHUANO"},
-"95585010":{nombre:"YENNI HAIDEE",apellido:"RIVAS",local:"AYACUCHO"},
-"45904285":{nombre:"PILAR AGOSTINA",apellido:"PERUSCO",local:"UGARTE"},
-"46950013":{nombre:"NAHIR VALENTINA",apellido:"NIEVA",local:"P. PILAR"},
-"45750101":{nombre:"AXEL GABRIEL",apellido:"ZACARÍAS",local:"TALCAHUANO"},
-"46283771":{nombre:"CELESTE VANINA",apellido:"LESME",local:"P. CHAMPAGNAT"},
-"45281875":{nombre:"BRISA MACARENA",apellido:"CONTRERAS",local:"OFFICE PARK"},
-"41945196":{nombre:"MALENA PATRICIA",apellido:"RUBIN",local:"MARTINEZ"},
-"39429182":{nombre:"FLORENCIA JUDITH",apellido:"ATAIDES",local:"RODRIGUEZ PEÑA"},
-"43208018":{nombre:"FERNANDA DEL MILAGRO",apellido:"VILLAFUERTE",local:"LA LUCILA"},
-"46431193":{nombre:"ABRIL",apellido:"CARDOZO DÍAZ",local:"P. PILAR"},
-"46643169":{nombre:"MERCEDES",apellido:"WEISS",local:"P. PILAR"},
-"45433155":{nombre:"SOFIA BELEN",apellido:"TAJES",local:"P. PILAR"},
-"43629257":{nombre:"CANDELA SOL",apellido:"VARGAS",local:"SCALABRINI ORTIZ"},
-"39488941":{nombre:"BELEN IRENE",apellido:"BENITEZ",local:"MARTINEZ"},
-"46910628":{nombre:"MIA MILAGROS",apellido:"WEIMER",local:"SAN ISIDRO"},
-"43728351":{nombre:"CAROLINA VERONICA",apellido:"BAEZ",local:"MARTINEZ"},
-"46192528":{nombre:"IARA",apellido:"LEGUIZAMON",local:"LA LUCILA"},
-"46850856":{nombre:"NATACHA NAHIR",apellido:"RINCÓN ROLDÁN",local:"P. CHAMPAGNAT"},
-"47788101":{nombre:"JULIANA VALENTINA",apellido:"GONZALO",local:"P. PILAR"},
-"46274426":{nombre:"VICTORIA DESIRÉE",apellido:"PAEZ",local:"TORTUGAS"},
-"47259100":{nombre:"ENZO AGUSTIN",apellido:"GOMEZ",local:"P. PILAR"},
-"43426648":{nombre:"MARIQUENA",apellido:"MARTINEZ",local:"CHARCAS"},
-"41048025":{nombre:"MATEO",apellido:"OSSORIO ARANA",local:"MARTINEZ"},
-"45989885":{nombre:"YAMILA AILEN",apellido:"IBARRA",local:"LA LUCILA"},
-"95781590":{nombre:"NIROSLEVI",apellido:"NARVAEZ GALAN",local:"MARTINEZ"},
-"95034145":{nombre:"SILVINA MARIA CRISTINA",apellido:"PEREIRA",local:"P. CHAMPAGNAT"},
-"47415675":{nombre:"THIAGO ARIEL",apellido:"VERNIERI",local:"SAN ISIDRO"},
-"43720234":{nombre:"MATIAS",apellido:"FEDCZUK",local:"ZABALA"},
-"47022622":{nombre:"MATEO AGUSTÍN",apellido:"IFRAN",local:"ROCA"},
-"44055169":{nombre:"ÁNGEL EMANUEL",apellido:"REBORA",local:"P. CHAMPAGNAT"},
-"42471187":{nombre:"JOHANNA BELÉN",apellido:"MEIJOME",local:"RODRIGUEZ PEÑA"},
-"44213872":{nombre:"GIULIANA AYLEN",apellido:"PERALTA",local:"UGARTE"},
-"42705740":{nombre:"LUCIANA",apellido:"RAMON",local:"JURAMENTO"},
-"47955861":{nombre:"SANTIAGO",apellido:"GARCIA",local:"LA LUCILA"},
-"42299743":{nombre:"ROCIO AYELÉN",apellido:"ABAN",local:"SCALABRINI ORTIZ"},
-"47459340":{nombre:"MORENA BELÉN",apellido:"ALVAREZ ANDELIQUE",local:"ROCA"},
-"42964932":{nombre:"MAIRA AYELEN",apellido:"CAJE",local:"LA LUCILA"},
-"48054002":{nombre:"MILENA",apellido:"AZCARATE",local:"SALGUERO"},
-"46350924":{nombre:"CATALINA ABRIL",apellido:"CANDIA",local:"UGARTE"},
-"41560238":{nombre:"STELLA MARIS",apellido:"SANCHEZ",local:"TALCAHUANO"},
-"43430151":{nombre:"YESICA FABIANA",apellido:"PEREZ GOMEZ",local:"LAS HERAS"},
-"45498921":{nombre:"LEILA SORAIDE",apellido:"BENITES",local:"JURAMENTO"},
-"46755447":{nombre:"MAIA",apellido:"SCAIANO CAÑETE",local:"AYACUCHO"},
-"40633025":{nombre:"FEBE ARIADNA",apellido:"MUZAKIS",local:"JURAMENTO"},
-"46289242":{nombre:"LARA MORENA",apellido:"GALLO",local:"SCALABRINI ORTIZ"},
-"43320614":{nombre:"CAMILA TAMARA",apellido:"RODRIGUEZ",local:"CHARCAS"},
-"40007721":{nombre:"MICAELA AYELEN",apellido:"ZABALA",local:"LAS HERAS"},
-"47861600":{nombre:"LUCIANO DAVID",apellido:"SECRETO",local:"SCALABRINI ORTIZ"},
-"42012414":{nombre:"MONICA",apellido:"GONZALEZ",local:"ZABALA"},
-"46106087":{nombre:"BARBARA",apellido:"ROSALES MEDINA",local:"SCALABRINI ORTIZ"},
-"46566205":{nombre:"ESTEFANIA",apellido:"FLORES",local:"MARTINEZ"},
-"41803359":{nombre:"LAURA ANALIA",apellido:"LUTTER",local:"P. CHAMPAGNAT"},
-"42472207":{nombre:"MAXIMILIANO TAIEL",apellido:"TEJERINA",local:"SCALABRINI ORTIZ"},
-"42033963":{nombre:"KAREN AYELEN",apellido:"BERNACHEA",local:"ROCA"},
-"96040837":{nombre:"REYCHEL",apellido:"FERNANDEZ MENDEZ",local:"RODRIGUEZ PEÑA"},
-"46096549":{nombre:"FELIPE",apellido:"VILLARES",local:"TORTUGAS"},
-"38892883":{nombre:"MARIA DE LOS ANGELES",apellido:"BARBARÁ",local:"SALGUERO"},
-"42282991":{nombre:"AGUSTINA ROCIO",apellido:"SUAREZ",local:"CHARCAS"},
-"42623944":{nombre:"CAMILA BELEN",apellido:"SANCHEZ",local:"P. PILAR"},
-"43913101":{nombre:"LOURDES LUCIA",apellido:"MAURI",local:"P. CHAMPAGNAT"},
-"96317435":{nombre:"SEBASTIÁN",apellido:"TUL AIÑA",local:"SCALABRINI ORTIZ"},
-"46987164":{nombre:"CELESTE",apellido:"ZERR BENITEZ",local:"AYACUCHO"},
-"96258641":{nombre:"MAILETH TRINIDAD",apellido:"GARCIA CAMACHO",local:"LAS HERAS"},
-"96236396":{nombre:"SARA DANIELA",apellido:"CARDENAS KRUH",local:"SCALABRINI ORTIZ"},
-"43815759":{nombre:"GISELLE MACARENA",apellido:"VARGAS",local:"TALCAHUANO"},
-"42472895":{nombre:"WANDA NICOLE",apellido:"JUAREZ",local:"SCALABRINI ORTIZ"},
-"95477087":{nombre:"VICTORIA HELENA",apellido:"CARDONA RAMIREZ",local:"SALGUERO"},
-"46955174":{nombre:"SELENE",apellido:"VERTULLO",local:"P. CHAMPAGNAT"},
-"45422488":{nombre:"CAMILA ALEJANDRA",apellido:"AVILA",local:"P. CHAMPAGNAT"},
-"48242083":{nombre:"LUCIA",apellido:"PUGGIA MOLINARI",local:"TALCAHUANO"},
-"46961641":{nombre:"MARTINA ANTONELA",apellido:"TORRES PEREZ",local:"MARTINEZ"},
-"96262795":{nombre:"SANDRA CRISTINA",apellido:"ARCE D'AMELIO",local:"ANCHORENA"},
-"41584759":{nombre:"MARIA LAURA",apellido:"CANDIA",local:"TALCAHUANO"},
-"44257397":{nombre:"PAULA NATALIA",apellido:"SOLER",local:"SCALABRINI ORTIZ"},
-"44939778":{nombre:"LOURDES NICOLE",apellido:"MOLINA MATTIA",local:"CHARCAS"},
-"46363643":{nombre:"MILAGROS KIARA",apellido:"RESILLE",local:"ROCA"},
-"48174735":{nombre:"MORENA",apellido:"REYNOSO",local:"TORTUGAS"},
-"46350926":{nombre:"MORENA",apellido:"BAEZ",local:"SAN ISIDRO"},
-"47804868":{nombre:"YAZMIN",apellido:"GASPAR",local:"ANCHORENA"},
-"48043341":{nombre:"NAIM LIONEL",apellido:"HASSAN",local:"JURAMENTO"},
-"40441285":{nombre:"LETICIA ANDREA",apellido:"CASTRO",local:"RODRIGUEZ PEÑA"},
-"47803339":{nombre:"LUCIANA ABIGAIL",apellido:"AVILA",local:"RODRIGUEZ PEÑA"},
-"41029169":{nombre:"MILENA JAENETTE",apellido:"KARCEVAS",local:"LAS HERAS"},
-"48567440":{nombre:"CAMILA ANDREA",apellido:"ALBORNOZ LEGARIA",local:"P. PILAR"},
-"96302536":{nombre:"DANIELA ANDREINA",apellido:"GUTIERREZ",local:"P. CHAMPAGNAT"},
-"47298364":{nombre:"GIULIANA PRISCILA",apellido:"SCHWINDT",local:"RODRIGUEZ PEÑA"},
-"46753481":{nombre:"LARA",apellido:"GOMEZ SAYEGT",local:"SCALABRINI ORTIZ"},
-"48475484":{nombre:"DAHIARA ALDANA",apellido:"CASERES",local:"SCALABRINI ORTIZ"},
-"95114318":{nombre:"ANA LUCIA",apellido:"SOTO BARRERA",local:"CHARCAS"},
-"95600891":{nombre:"GREIDY VANESSA",apellido:"AVENDAÑO AMOROCHO",local:"P. PILAR"},
-"47099612":{nombre:"DELFINA ROCIO",apellido:"APA",local:"SCALABRINI ORTIZ"},
-"47206413":{nombre:"AILEN",apellido:"FOURCADE",local:"JURAMENTO"},
-"46917349":{nombre:"TOBIAS EZEQUIEL",apellido:"MANFRE",local:"MARTINEZ"},
-"46698149":{nombre:"BRISA ANTONELLA",apellido:"OJEDA",local:"SAN ISIDRO"}
-};
+    document.querySelector('#fecha').value = localToday.toISOString().slice(0, 10);
+    document.querySelector('#todayLabel').textContent = today.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
 
-let currentDNI=null,currentEmp=null;
+    function normalizeDni(value) {
+      return String(value || '').replace(/\D/g, '');
+    }
 
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
-function setBtn(id,d){const b=document.getElementById(id);if(b)b.disabled=d;}
-function setInf(id,v){const i=document.getElementById(id);if(i)i.style.display=v?'block':'none';}
-function setErr(id,v,msg){const e=document.getElementById(id);if(e){e.style.display=v?'block':'none';if(msg)e.textContent=msg;}}
+    function setStatus(message, type) {
+      statusBox.textContent = message;
+      statusBox.className = type ? `status ${type}` : 'status';
+    }
 
-function toggleAdmin(){const p=document.getElementById('admin-pass');p.style.display=p.style.display==='block'?'none':'block';}
+    function getLocales() {
+      const locales = new Set(LOCALES_EXTRA);
+      NOMINA.forEach(employee => {
+        if (employee.local) locales.add(employee.local);
+      });
+      return Array.from(locales).sort((a, b) => a.localeCompare(b, 'es'));
+    }
 
-function loginAdmin(){
-  if(document.getElementById('inp-pass').value===ADMIN_PASS){show('s-admin');}
-  else{setErr('err-pass',true,'Contraseña incorrecta');}
-}
+    function renderLocalOptions(selectedLocal) {
+      const options = ['<option value="">Seleccionar local</option>'];
+      getLocales().forEach(local => {
+        const selected = local === selectedLocal ? ' selected' : '';
+        options.push(`<option value="${local}"${selected}>${local}</option>`);
+      });
+      localSelect.innerHTML = options.join('');
+    }
 
-function buscarDNI(){
-  const dni=document.getElementById('inp-dni').value.trim();
-  setErr('err-dni',false);setInf('inf-dni',false);
-  if(!dni){setErr('err-dni',true,'Ingresá tu DNI');return;}
-  if(!NOMINA[dni]){setErr('err-dni',true,'❌ DNI no encontrado en el sistema');return;}
-  currentDNI=dni;currentEmp=NOMINA[dni];
-  document.getElementById('pf-iniciales').textContent=currentEmp.nombre[0]+currentEmp.apellido[0];
-  document.getElementById('pf-nombre').textContent=currentEmp.nombre+' '+currentEmp.apellido;
-  document.getElementById('pf-local').textContent='📍 '+currentEmp.local;
-  document.getElementById('pf-dni').textContent='DNI: '+dni;
-  document.getElementById('tp-nombre').textContent=currentEmp.nombre+' '+currentEmp.apellido;
-  document.getElementById('f-local').value=currentEmp.local;
-  show('s-perfil');
-  cargarHistorial();
-}
+    function updateEmployeeFromDni() {
+      const dni = normalizeDni(dniInput.value);
+      dniInput.value = dni;
 
-async function cargarHistorial(){
-  document.getElementById('hist-list').innerHTML='<div class="hist-empty">⏳ Cargando...</div>';
-  try{
-    const res=await fetch(SCRIPT_URL+'?t='+Date.now());
-    const raw=await res.json();
-    const h=raw[0],rows=raw.slice(1);
-    const dI=h.indexOf('DNI'),lI=h.indexOf('LOCAL'),fI=h.indexOf('FECHA'),hI=h.indexOf('HORAS'),tI=h.indexOf('TIPO'),oI=h.indexOf('OBSERVACION');
-    const mis=rows.filter(r=>String(r[dI])===String(currentDNI));
-    let fav=0,des=0;
-    mis.forEach(r=>{const hs=parseFloat(r[hI])||0;if(r[tI]==='favor')fav+=hs;else des+=hs;});
-    const sal=fav-des;
-    const sv=document.getElementById('pf-saldo');
-    sv.textContent=(sal>=0?'+':'')+sal.toFixed(1)+' hs';
-    sv.className='saldo-val '+(sal>0?'pos':sal<0?'neg':'neu');
-    document.getElementById('pf-detalle').textContent=fav.toFixed(1)+' hs a favor — '+des.toFixed(1)+' hs descontadas';
-    const list=document.getElementById('hist-list');
-    if(!mis.length){list.innerHTML='<div class="hist-empty">Sin movimientos aún.<br>Tocá + para cargar tus primeras horas.</div>';return;}
-    list.innerHTML=[...mis].reverse().map(r=>{
-      const hs=parseFloat(r[hI])||0,t=r[tI],ok=t==='favor';
-      return`<div class="hist-item"><div><div class="hist-fecha">${r[fI]}</div><div class="hist-local">📍 ${r[lI]}</div><span class="badge ${ok?'badge-s':'badge-d'}">${ok?'✅ A favor':'🔻 Descuento'}</span>${r[oI]?`<div class="hist-obs">💬 ${r[oI]}</div>`:''}</div><div class="hist-hs ${ok?'pos':'neg'}">${ok?'+':'-'}${hs.toFixed(1)} hs</div></div>`;
-    }).join('');
-  }catch(e){document.getElementById('hist-list').innerHTML='<div class="hist-empty">⚠️ No se pudo cargar. Verificá tu conexión.</div>';}
-}
+      if (!dni) {
+        nombreInput.value = '';
+        renderLocalOptions('');
+        submitButton.disabled = true;
+        employeeHint.textContent = 'Ingresar DNI sin puntos.';
+        employeeHint.style.color = '';
+        return;
+      }
 
-function irCargar(){
-  setErr('err-form',false);setInf('inf-form',false);
-  document.getElementById('f-local').value=currentEmp.local;
-  ['f-tipo','f-fecha','f-horas','f-obs'].forEach(id=>{document.getElementById(id).value='';});
-  show('s-cargar');
-}
+      const employee = employeesByDni.get(dni);
+      if (!employee) {
+        nombreInput.value = '';
+        renderLocalOptions('');
+        submitButton.disabled = true;
+        employeeHint.textContent = 'DNI no encontrado en la nomina.';
+        employeeHint.style.color = '#b42318';
+        return;
+      }
 
-async function guardarCarga(){
-  const local=document.getElementById('f-local').value;
-  const tipo=document.getElementById('f-tipo').value;
-  const fecha=document.getElementById('f-fecha').value;
-  const horas=parseFloat(document.getElementById('f-horas').value);
-  const obs=document.getElementById('f-obs').value.trim();
-  setErr('err-form',false);
-  if(!local||!tipo||!fecha||!horas||horas<=0){setErr('err-form',true,'Completá todos los campos obligatorios');return;}
-  setBtn('btn-guardar',true);setInf('inf-form',true);
-  try{
-    await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({id:'ID-'+Date.now(),dni:currentDNI,apellido:currentEmp.apellido,nombre:currentEmp.nombre,local,fecha,horas,tipo,observacion:obs})});
-    document.getElementById('ok-resumen').textContent=(tipo==='favor'?'+ ':'-')+horas.toFixed(1)+' hs en '+local+' · '+fecha;
-    show('s-ok');
-  }catch(e){setErr('err-form',true,'❌ Error al guardar. Intentá de nuevo.');}
-  setBtn('btn-guardar',false);setInf('inf-form',false);
-}
+      nombreInput.value = employee.nombre;
+      renderLocalOptions(employee.local);
+      submitButton.disabled = false;
+      employeeHint.textContent = 'Empleado encontrado.';
+      employeeHint.style.color = '#067647';
+    }
 
-async function agregarEmpleado(){
-  const dni=document.getElementById('a-dni').value.trim();
-  const ap=document.getElementById('a-apellido').value.trim().toUpperCase();
-  const nom=document.getElementById('a-nombre').value.trim().toUpperCase();
-  const loc=document.getElementById('a-local').value;
-  setErr('err-admin',false);
-  if(!dni||!ap||!nom||!loc){setErr('err-admin',true,'Completá todos los campos');return;}
-  if(NOMINA[dni]){setErr('err-admin',true,'Ese DNI ya existe en la nómina');return;}
-  setInf('inf-admin',true);
-  NOMINA[dni]={nombre:nom,apellido:ap,local:loc};
-  try{await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({accion:'NOMINA',dni,apellido:ap,nombre:nom,local:loc})});}catch(e){}
-  setInf('inf-admin',false);
-  ['a-dni','a-apellido','a-nombre'].forEach(id=>{document.getElementById(id).value='';});
-  document.getElementById('a-local').value='';
-  const suc=document.getElementById('suc-admin');suc.style.display='block';
-  setTimeout(()=>{suc.style.display='none';},3500);
-}
+    renderLocalOptions('');
+    dniInput.addEventListener('input', updateEmployeeFromDni);
 
-function buscarAdmin(){
-  const dni=document.getElementById('b-dni').value.trim();
-  const res=document.getElementById('admin-resultado');
-  if(!NOMINA[dni]){res.innerHTML='<div style="font-size:13px;color:var(--red);padding:8px;">DNI no encontrado</div>';return;}
-  const e=NOMINA[dni];
-  res.innerHTML=`<div class="emp-row"><div><div style="font-size:14px;font-weight:600;">${e.nombre} ${e.apellido}</div><div style="font-size:12px;color:var(--text2);margin-top:3px;"><span class="tag">${e.local}</span> DNI ${dni}</div></div></div><div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.6;">Para modificar datos de este empleado, editá directamente la solapa <b>NOMINA</b> en Google Sheets.</div>`;
-}
+    form.addEventListener('submit', (event) => {
+      if (WEB_APP_URL.includes('PEGAR_ACA')) {
+        event.preventDefault();
+        setStatus('Falta configurar la URL del Apps Script.', 'error');
+        return;
+      }
 
-async function irPerfil(){show('s-perfil');await cargarHistorial();}
-function irHome(){
-  currentDNI=null;currentEmp=null;
-  document.getElementById('inp-dni').value='';
-  setErr('err-dni',false);
-  document.getElementById('admin-pass').style.display='none';
-  document.getElementById('inp-pass').value='';
-  show('s-login');
-}
-</script>
+      if (!employeesByDni.has(normalizeDni(dniInput.value))) {
+        event.preventDefault();
+        setStatus('El DNI no esta en la nomina.', 'error');
+        return;
+      }
+
+      form.action = WEB_APP_URL;
+      submitButton.disabled = true;
+      setStatus('Enviando...', 'warning');
+    });
+
+    frame.addEventListener('load', () => {
+      if (!statusBox.textContent.includes('Enviando')) return;
+
+      submitButton.disabled = true;
+      form.reset();
+      document.querySelector('#fecha').value = localToday.toISOString().slice(0, 10);
+      nombreInput.value = '';
+      renderLocalOptions('');
+      employeeHint.textContent = 'Ingresar DNI sin puntos.';
+      employeeHint.style.color = '';
+      setStatus('Carga enviada correctamente.', 'ok');
+    });
+  </script>
 </body>
 </html>
