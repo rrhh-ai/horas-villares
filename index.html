@@ -86,6 +86,12 @@
       font-weight: 700;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     form {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -313,6 +319,11 @@
         flex-direction: column;
       }
 
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
       form {
         padding: 16px;
       }
@@ -355,7 +366,10 @@
         <div class="brand">New Garden</div>
         <h1>Carga de horas</h1>
       </div>
-      <div class="date-pill" id="todayLabel"></div>
+      <div class="header-actions">
+        <button class="secondary-button" id="openConsultButton" type="button">Consultar mis horas</button>
+        <div class="date-pill" id="todayLabel"></div>
+      </div>
     </header>
 
     <form id="hoursForm" method="post" target="submitFrame">
@@ -405,8 +419,7 @@
 
       <input id="registradoDesde" name="registradoDesde" type="hidden" value="GitHub Pages">
 
-      <div class="actions between">
-        <button class="secondary-button" id="openConsultButton" type="button">Consultar mis horas</button>
+      <div class="actions">
         <button id="submitButton" type="submit" disabled>Enviar</button>
       </div>
 
@@ -427,8 +440,7 @@
         </div>
       </div>
 
-      <div class="actions between">
-        <button class="ghost-button" id="backToFormButton" type="button">Volver a cargar horas</button>
+      <div class="actions">
         <button id="runConsultButton" type="button" disabled>Aceptar</button>
       </div>
 
@@ -467,6 +479,10 @@
             <tbody id="historyBody"></tbody>
           </table>
         </div>
+
+        <div class="actions">
+          <button id="finishConsultButton" type="button">Finalizar consulta</button>
+        </div>
       </div>
     </section>
 
@@ -490,7 +506,7 @@
     const employeeHint = document.querySelector('#employeeHint');
     const consultPanel = document.querySelector('#consultPanel');
     const openConsultButton = document.querySelector('#openConsultButton');
-    const backToFormButton = document.querySelector('#backToFormButton');
+    const finishConsultButton = document.querySelector('#finishConsultButton');
     const consultDniInput = document.querySelector('#consultDni');
     const consultNombreInput = document.querySelector('#consultNombre');
     const consultHint = document.querySelector('#consultHint');
@@ -606,7 +622,7 @@
       consultDniInput.focus();
     });
 
-    backToFormButton.addEventListener('click', () => {
+    finishConsultButton.addEventListener('click', () => {
       consultPanel.classList.add('hidden');
       form.classList.remove('hidden');
     });
