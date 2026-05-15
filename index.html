@@ -307,7 +307,7 @@
 
   <script src="nomina.js"></script>
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/library/d/1JcvfQhqpXZyXep8mRLqMt5xNaLmLUqAkJhm1ZNeSegcFgGWwQDWavVK6/2';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyCnHBe3NhPE5IABgTz89JDsk81LhZCkSLAJe3JwGSG09eGW-K6aUIl1WAiEPW06-KriA/exec';
 
     const NOMINA = window.NOMINA || [];
     const LOCALES_EXTRA = window.LOCALES_EXTRA || [];
@@ -345,7 +345,9 @@
       NOMINA.forEach(employee => {
         if (employee.local) locales.add(employee.local);
       });
-      return Array.from(locales).sort((a, b) => a.localeCompare(b, 'es'));
+      return Array.from(locales)
+        .filter(local => local !== 'RH')
+        .sort((a, b) => a.localeCompare(b, 'es'));
     }
 
     function renderLocalOptions(selectedLocal) {
