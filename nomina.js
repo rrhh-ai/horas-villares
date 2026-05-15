@@ -1112,7 +1112,6 @@ window.LOCALES_EXTRA = [
   "PAMPA",
   "PASEO CHAMPAGNAT",
   "PASEO PILAR",
-  "RH",
   "RIOBAMBA",
   "ROCA",
   "RODRIGUEZ PEÑA",
