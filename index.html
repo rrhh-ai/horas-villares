@@ -305,19 +305,12 @@
     <iframe name="submitFrame" id="submitFrame" title="Envio de formulario"></iframe>
   </main>
 
+  <script src="nomina.js"></script>
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyCnHBe3NhPE5IABgTz89JDsk81LhZCkSLAJe3JwGSG09eGW-K6aUIl1WAiEPW06-KriA/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/library/d/1JcvfQhqpXZyXep8mRLqMt5xNaLmLUqAkJhm1ZNeSegcFgGWwQDWavVK6/2';
 
-    const NOMINA = [
-      { dni: '11111111', nombre: 'PEREZ JUAN', local: 'CASA CENTRAL' },
-      { dni: '22222222', nombre: 'GOMEZ MARIA', local: 'SUCURSAL 1' }
-    ];
-
-    const LOCALES_EXTRA = [
-      'CASA CENTRAL',
-      'SUCURSAL 1',
-      'SUCURSAL 2'
-    ];
+    const NOMINA = window.NOMINA || [];
+    const LOCALES_EXTRA = window.LOCALES_EXTRA || [];
 
     const form = document.querySelector('#hoursForm');
     const submitButton = document.querySelector('#submitButton');
