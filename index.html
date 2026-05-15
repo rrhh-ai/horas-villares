@@ -94,6 +94,14 @@
       padding: 22px;
     }
 
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -158,6 +166,10 @@
       margin-top: 18px;
     }
 
+    .actions.between {
+      justify-content: space-between;
+    }
+
     button {
       min-height: 44px;
       border: 0;
@@ -168,6 +180,28 @@
       cursor: pointer;
       font: inherit;
       font-weight: 700;
+    }
+
+    .secondary-button {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+    }
+
+    .secondary-button:hover {
+      background: #f8fafc;
+    }
+
+    .ghost-button {
+      background: transparent;
+      color: var(--primary);
+      padding: 0;
+      min-height: auto;
+    }
+
+    .ghost-button:hover {
+      background: transparent;
+      color: var(--primary-dark);
     }
 
     button:hover {
@@ -202,6 +236,73 @@
       display: none;
     }
 
+    .hidden {
+      display: none;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .summary-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      background: #f8fafc;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .summary-value {
+      margin-top: 5px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .person-title {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .history-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      background: #fff;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
     @media (max-width: 680px) {
       main {
         padding: 18px 0;
@@ -222,10 +323,19 @@
 
       .actions {
         justify-content: stretch;
+        flex-direction: column;
       }
 
       button {
         width: 100%;
+      }
+
+      .ghost-button {
+        width: auto;
+      }
+
+      .summary {
+        grid-template-columns: 1fr;
       }
 
       .page-logo {
@@ -295,12 +405,70 @@
 
       <input id="registradoDesde" name="registradoDesde" type="hidden" value="GitHub Pages">
 
-      <div class="actions">
+      <div class="actions between">
+        <button class="secondary-button" id="openConsultButton" type="button">Consultar mis horas</button>
         <button id="submitButton" type="submit" disabled>Enviar</button>
       </div>
 
       <div id="status" class="status" role="status" aria-live="polite"></div>
     </form>
+
+    <section class="panel hidden" id="consultPanel">
+      <div class="grid">
+        <div class="field">
+          <label for="consultDni">DNI</label>
+          <input id="consultDni" inputmode="numeric" autocomplete="off">
+          <div class="hint" id="consultHint">Ingresar DNI sin puntos.</div>
+        </div>
+
+        <div class="field">
+          <label for="consultNombre">Apellido y nombre</label>
+          <input id="consultNombre" readonly>
+        </div>
+      </div>
+
+      <div class="actions between">
+        <button class="ghost-button" id="backToFormButton" type="button">Volver a cargar horas</button>
+        <button id="runConsultButton" type="button" disabled>Aceptar</button>
+      </div>
+
+      <div id="consultStatus" class="status" role="status" aria-live="polite"></div>
+
+      <div class="hidden" id="consultResult">
+        <h2 class="person-title" id="resultName"></h2>
+
+        <div class="summary">
+          <div class="summary-item">
+            <div class="summary-label">Total horas a favor</div>
+            <div class="summary-value" id="totalFavor">0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Total horas descontadas</div>
+            <div class="summary-value" id="totalDescontar">0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Saldo disponible</div>
+            <div class="summary-value" id="saldoHoras">0</div>
+          </div>
+        </div>
+
+        <div class="history-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Local</th>
+                <th>Horas a favor</th>
+                <th>Horas descontadas</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
     <iframe name="submitFrame" id="submitFrame" title="Envio de formulario"></iframe>
   </main>
@@ -320,6 +488,20 @@
     const nombreInput = document.querySelector('#nombre');
     const localSelect = document.querySelector('#local');
     const employeeHint = document.querySelector('#employeeHint');
+    const consultPanel = document.querySelector('#consultPanel');
+    const openConsultButton = document.querySelector('#openConsultButton');
+    const backToFormButton = document.querySelector('#backToFormButton');
+    const consultDniInput = document.querySelector('#consultDni');
+    const consultNombreInput = document.querySelector('#consultNombre');
+    const consultHint = document.querySelector('#consultHint');
+    const runConsultButton = document.querySelector('#runConsultButton');
+    const consultStatus = document.querySelector('#consultStatus');
+    const consultResult = document.querySelector('#consultResult');
+    const resultName = document.querySelector('#resultName');
+    const totalFavor = document.querySelector('#totalFavor');
+    const totalDescontar = document.querySelector('#totalDescontar');
+    const saldoHoras = document.querySelector('#saldoHoras');
+    const historyBody = document.querySelector('#historyBody');
     const today = new Date();
     const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
     const employeesByDni = new Map(NOMINA.map(employee => [normalizeDni(employee.dni), employee]));
@@ -338,6 +520,25 @@
     function setStatus(message, type) {
       statusBox.textContent = message;
       statusBox.className = type ? `status ${type}` : 'status';
+    }
+
+    function setConsultStatus(message, type) {
+      consultStatus.textContent = message;
+      consultStatus.className = type ? `status ${type}` : 'status';
+    }
+
+    function formatHours(value) {
+      const number = Number(value || 0);
+      return Number.isInteger(number) ? String(number) : number.toFixed(2);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
     function getLocales() {
@@ -391,6 +592,117 @@
 
     renderLocalOptions('');
     dniInput.addEventListener('input', updateEmployeeFromDni);
+
+    openConsultButton.addEventListener('click', () => {
+      form.classList.add('hidden');
+      consultPanel.classList.remove('hidden');
+      consultDniInput.value = '';
+      consultNombreInput.value = '';
+      runConsultButton.disabled = true;
+      consultResult.classList.add('hidden');
+      setConsultStatus('', '');
+      consultHint.textContent = 'Ingresar DNI sin puntos.';
+      consultHint.style.color = '';
+      consultDniInput.focus();
+    });
+
+    backToFormButton.addEventListener('click', () => {
+      consultPanel.classList.add('hidden');
+      form.classList.remove('hidden');
+    });
+
+    consultDniInput.addEventListener('input', () => {
+      const dni = normalizeDni(consultDniInput.value);
+      consultDniInput.value = dni;
+      consultResult.classList.add('hidden');
+
+      if (!dni) {
+        consultNombreInput.value = '';
+        runConsultButton.disabled = true;
+        consultHint.textContent = 'Ingresar DNI sin puntos.';
+        consultHint.style.color = '';
+        return;
+      }
+
+      const employee = employeesByDni.get(dni);
+      if (!employee) {
+        consultNombreInput.value = '';
+        runConsultButton.disabled = true;
+        consultHint.textContent = 'DNI no encontrado en la nomina.';
+        consultHint.style.color = '#b42318';
+        return;
+      }
+
+      consultNombreInput.value = employee.nombre;
+      runConsultButton.disabled = false;
+      consultHint.textContent = 'Empleado encontrado.';
+      consultHint.style.color = '#067647';
+    });
+
+    runConsultButton.addEventListener('click', () => {
+      const dni = normalizeDni(consultDniInput.value);
+      if (!employeesByDni.has(dni)) {
+        setConsultStatus('El DNI no esta en la nomina.', 'error');
+        return;
+      }
+
+      setConsultStatus('Consultando...', 'warning');
+      runConsultButton.disabled = true;
+      consultResult.classList.add('hidden');
+
+      const callbackName = `consultaHorasCallback_${Date.now()}`;
+      const script = document.createElement('script');
+
+      window[callbackName] = (response) => {
+        delete window[callbackName];
+        script.remove();
+        runConsultButton.disabled = false;
+
+        if (!response || !response.ok) {
+          setConsultStatus(response?.error || 'No se pudo consultar el historial.', 'error');
+          return;
+        }
+
+        renderConsultResult(response);
+        setConsultStatus('', '');
+      };
+
+      script.onerror = () => {
+        delete window[callbackName];
+        script.remove();
+        runConsultButton.disabled = false;
+        setConsultStatus('No se pudo conectar con la consulta.', 'error');
+      };
+
+      script.src = `${WEB_APP_URL}?action=consulta&dni=${encodeURIComponent(dni)}&callback=${callbackName}`;
+      document.body.appendChild(script);
+    });
+
+    function renderConsultResult(data) {
+      const employee = employeesByDni.get(data.dni);
+      const name = data.nombre || employee?.nombre || '';
+      resultName.textContent = name;
+      totalFavor.textContent = formatHours(data.totalFavor);
+      totalDescontar.textContent = formatHours(data.totalDescontar);
+      saldoHoras.textContent = formatHours(data.saldo);
+
+      if (!data.historial.length) {
+        historyBody.innerHTML = '<tr><td colspan="6">No hay cargas registradas para este DNI.</td></tr>';
+      } else {
+        historyBody.innerHTML = data.historial.map(row => `
+          <tr>
+            <td>${escapeHtml(row.fecha)}</td>
+            <td>${escapeHtml(row.tipo)}</td>
+            <td>${escapeHtml(row.local)}</td>
+            <td>${formatHours(row.horasAFavor)}</td>
+            <td>${formatHours(row.horasADescontar)}</td>
+            <td>${escapeHtml(row.motivo)}</td>
+          </tr>
+        `).join('');
+      }
+
+      consultResult.classList.remove('hidden');
+    }
 
     form.addEventListener('submit', (event) => {
       if (WEB_APP_URL.includes('PEGAR_ACA')) {
