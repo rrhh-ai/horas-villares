@@ -248,7 +248,7 @@
 
     .summary {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1fr);
       gap: 12px;
       margin: 18px 0;
     }
@@ -460,34 +460,10 @@
         <h2 class="person-title" id="resultName"></h2>
 
         <div class="summary">
-          <div class="summary-item">
-            <div class="summary-label">Total horas a favor realizadas</div>
-            <div class="summary-value" id="totalFavor">0</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Total horas descontadas</div>
-            <div class="summary-value" id="totalDescontar">0</div>
-          </div>
           <div class="summary-item" id="saldoCard">
             <div class="summary-label">Horas disponibles</div>
             <div class="summary-value" id="saldoHoras">0</div>
           </div>
-        </div>
-
-        <div class="history-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Tipo</th>
-                <th>Local</th>
-                <th>Horas a favor</th>
-                <th>Horas descontadas</th>
-                <th>Motivo</th>
-              </tr>
-            </thead>
-            <tbody id="historyBody"></tbody>
-          </table>
         </div>
 
         <div class="actions">
@@ -524,11 +500,8 @@
     const consultStatus = document.querySelector('#consultStatus');
     const consultResult = document.querySelector('#consultResult');
     const resultName = document.querySelector('#resultName');
-    const totalFavor = document.querySelector('#totalFavor');
-    const totalDescontar = document.querySelector('#totalDescontar');
     const saldoHoras = document.querySelector('#saldoHoras');
     const saldoCard = document.querySelector('#saldoCard');
-    const historyBody = document.querySelector('#historyBody');
     const today = new Date();
     const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
     const employeesByDni = new Map(NOMINA.map(employee => [normalizeDni(employee.dni), employee]));
@@ -709,27 +682,10 @@
       const employee = employeesByDni.get(data.dni);
       const name = data.nombre || employee?.nombre || '';
       resultName.textContent = name;
-      totalFavor.textContent = formatHours(data.totalFavor);
-      totalDescontar.textContent = formatHours(data.totalDescontar);
       saldoHoras.textContent = formatHours(data.saldo);
       saldoCard.classList.remove('positive', 'negative');
       if (Number(data.saldo) > 0) saldoCard.classList.add('positive');
       if (Number(data.saldo) < 0) saldoCard.classList.add('negative');
-
-      if (!data.historial.length) {
-        historyBody.innerHTML = '<tr><td colspan="6">No hay cargas registradas para este DNI.</td></tr>';
-      } else {
-        historyBody.innerHTML = data.historial.map(row => `
-          <tr>
-            <td>${escapeHtml(row.fecha)}</td>
-            <td>${escapeHtml(row.tipo)}</td>
-            <td>${escapeHtml(row.local)}</td>
-            <td>${formatHours(row.horasAFavor)}</td>
-            <td>${formatHours(row.horasADescontar)}</td>
-            <td>${escapeHtml(row.motivo)}</td>
-          </tr>
-        `).join('');
-      }
 
       consultResult.classList.remove('hidden');
     }
