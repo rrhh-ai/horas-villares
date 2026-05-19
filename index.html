@@ -260,6 +260,16 @@
       background: #f8fafc;
     }
 
+    .summary-item.positive {
+      border-color: #abefc6;
+      background: #ecfdf3;
+    }
+
+    .summary-item.negative {
+      border-color: #fecdca;
+      background: #fef3f2;
+    }
+
     .summary-label {
       color: var(--muted);
       font-size: 13px;
@@ -451,15 +461,15 @@
 
         <div class="summary">
           <div class="summary-item">
-            <div class="summary-label">Total horas a favor</div>
+            <div class="summary-label">Total horas a favor realizadas</div>
             <div class="summary-value" id="totalFavor">0</div>
           </div>
           <div class="summary-item">
             <div class="summary-label">Total horas descontadas</div>
             <div class="summary-value" id="totalDescontar">0</div>
           </div>
-          <div class="summary-item">
-            <div class="summary-label">Saldo disponible</div>
+          <div class="summary-item" id="saldoCard">
+            <div class="summary-label">Horas disponibles</div>
             <div class="summary-value" id="saldoHoras">0</div>
           </div>
         </div>
@@ -517,6 +527,7 @@
     const totalFavor = document.querySelector('#totalFavor');
     const totalDescontar = document.querySelector('#totalDescontar');
     const saldoHoras = document.querySelector('#saldoHoras');
+    const saldoCard = document.querySelector('#saldoCard');
     const historyBody = document.querySelector('#historyBody');
     const today = new Date();
     const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
@@ -701,6 +712,9 @@
       totalFavor.textContent = formatHours(data.totalFavor);
       totalDescontar.textContent = formatHours(data.totalDescontar);
       saldoHoras.textContent = formatHours(data.saldo);
+      saldoCard.classList.remove('positive', 'negative');
+      if (Number(data.saldo) > 0) saldoCard.classList.add('positive');
+      if (Number(data.saldo) < 0) saldoCard.classList.add('negative');
 
       if (!data.historial.length) {
         historyBody.innerHTML = '<tr><td colspan="6">No hay cargas registradas para este DNI.</td></tr>';
