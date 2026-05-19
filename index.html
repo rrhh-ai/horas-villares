@@ -250,7 +250,7 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr);
       gap: 12px;
-      margin: 18px 0;
+      margin: 0;
     }
 
     .summary-item {
@@ -258,6 +258,20 @@
       border-radius: 8px;
       padding: 14px;
       background: #f8fafc;
+    }
+
+    .consult-summary-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .name-colon {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.2;
     }
 
     .summary-item.positive {
@@ -282,11 +296,7 @@
       font-weight: 700;
     }
 
-    .person-title {
-      margin: 0;
-      font-size: 22px;
-      line-height: 1.2;
-    }
+    .person-title { margin: 0; }
 
     .history-wrap {
       overflow-x: auto;
@@ -357,6 +367,14 @@
 
       .summary {
         grid-template-columns: 1fr;
+      }
+
+      .consult-summary-row {
+        grid-template-columns: 1fr;
+      }
+
+      .name-colon {
+        font-size: 20px;
       }
 
       .page-logo {
@@ -457,12 +475,14 @@
       <div id="consultStatus" class="status" role="status" aria-live="polite"></div>
 
       <div class="hidden" id="consultResult">
-        <h2 class="person-title" id="resultName"></h2>
+        <div class="consult-summary-row">
+          <h2 class="person-title"><span id="resultName"></span><span class="name-colon">:</span></h2>
 
-        <div class="summary">
-          <div class="summary-item" id="saldoCard">
-            <div class="summary-label">Horas disponibles</div>
-            <div class="summary-value" id="saldoHoras">0</div>
+          <div class="summary">
+            <div class="summary-item" id="saldoCard">
+              <div class="summary-label">Horas disponibles</div>
+              <div class="summary-value" id="saldoHoras">0</div>
+            </div>
           </div>
         </div>
 
