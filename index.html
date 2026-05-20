@@ -119,6 +119,15 @@
       gap: 7px;
     }
 
+    .consult-input-grid {
+      align-items: start;
+    }
+
+    .consult-input-grid input {
+      min-height: 66px;
+      font-size: 22px;
+    }
+
     .field.full {
       grid-column: 1 / -1;
     }
@@ -259,13 +268,17 @@
       padding: 14px;
       background: #f8fafc;
       text-align: center;
+      min-height: 88px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .consult-summary-row {
       display: grid;
-      grid-template-columns: auto 1fr;
-      align-items: center;
-      gap: 10px;
+      grid-template-columns: minmax(260px, max-content) minmax(260px, 1fr);
+      align-items: stretch;
+      gap: 14px;
       margin: 18px 0;
     }
 
@@ -273,6 +286,13 @@
       font-size: 22px;
       font-weight: 700;
       line-height: 1.2;
+    }
+
+    .person-title {
+      display: flex;
+      align-items: center;
+      min-height: 88px;
+      margin: 0;
     }
 
     .summary-item.positive {
@@ -297,12 +317,11 @@
       font-weight: 700;
     }
 
-    .person-title { margin: 0; }
-
     .history-wrap {
       overflow-x: auto;
       border: 1px solid var(--border);
       border-radius: 8px;
+      margin-top: 16px;
     }
 
     table {
@@ -372,6 +391,10 @@
 
       .consult-summary-row {
         grid-template-columns: 1fr;
+      }
+
+      .person-title {
+        min-height: auto;
       }
 
       .name-colon {
@@ -456,7 +479,7 @@
     </form>
 
     <section class="panel hidden" id="consultPanel">
-      <div class="grid">
+      <div class="grid consult-input-grid">
         <div class="field">
           <label for="consultDni">DNI</label>
           <input id="consultDni" inputmode="numeric" autocomplete="off">
@@ -485,6 +508,21 @@
               <div class="summary-value" id="saldoHoras">0</div>
             </div>
           </div>
+        </div>
+
+        <div class="history-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha de carga</th>
+                <th>Apellido nombre</th>
+                <th>Horas a favor</th>
+                <th>Horas descontadas</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
         </div>
 
         <div class="actions">
@@ -523,6 +561,7 @@
     const resultName = document.querySelector('#resultName');
     const saldoHoras = document.querySelector('#saldoHoras');
     const saldoCard = document.querySelector('#saldoCard');
+    const historyBody = document.querySelector('#historyBody');
     const today = new Date();
     const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
     const employeesByDni = new Map(NOMINA.map(employee => [normalizeDni(employee.dni), employee]));
@@ -707,6 +746,20 @@
       saldoCard.classList.remove('positive', 'negative');
       if (Number(data.saldo) > 0) saldoCard.classList.add('positive');
       if (Number(data.saldo) < 0) saldoCard.classList.add('negative');
+
+      if (!data.historial.length) {
+        historyBody.innerHTML = '<tr><td colspan="5">No hay cargas registradas para este DNI.</td></tr>';
+      } else {
+        historyBody.innerHTML = data.historial.map(row => `
+          <tr>
+            <td>${escapeHtml(row.fecha)}</td>
+            <td>${escapeHtml(row.nombre || name)}</td>
+            <td>${formatHours(row.horasAFavor)}</td>
+            <td>${formatHours(row.horasADescontar)}</td>
+            <td>${escapeHtml(row.motivo)}</td>
+          </tr>
+        `).join('');
+      }
 
       consultResult.classList.remove('hidden');
     }
